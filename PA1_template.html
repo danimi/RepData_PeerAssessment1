@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>Loading and preprocessing the data</title>
+
+<script type="text/javascript">
+window.onload = function() {
+  var imgs = document.getElementsByTagName('img'), i, img;
+  for (i = 0; i < imgs.length; i++) {
+    img = imgs[i];
+    // center an image if it is the only element of its parent
+    if (img.parentElement.childElementCount === 1)
+      img.parentElement.style.textAlign = 'center';
+  }
+};
+</script>
+
+
+
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+pre {
+  overflow-x: auto;
+}
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<h2>Loading and preprocessing the data</h2>
+
+<h4>1. Load the data (i.e. read.csv())</h4>
+
+<pre><code class="r">activdata &lt;- read.csv(&#39;activity.csv&#39;)
+</code></pre>
+
+<h4>2. Process/transform the data (if necessary) into a format suitable for your analysis</h4>
+
+<pre><code class="r">activdata$date &lt;- as.Date(activdata$date)
+library(lubridate)
+activdata$date &lt;- ymd(activdata$date)
+str(activdata)
+</code></pre>
+
+<pre><code>## &#39;data.frame&#39;:    17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : POSIXct, format: &quot;2012-10-01&quot; &quot;2012-10-01&quot; ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+</code></pre>
+
+<pre><code class="r">library(data.table)
+activdata &lt;- as.data.table(activdata)
+</code></pre>
+
+<h1>Data table with complete rows only</h1>
+
+<pre><code class="r">compdata &lt;- activdata[complete.cases(activdata$steps),]
+</code></pre>
+
+<h2>What is mean total number of steps taken per day?</h2>
+
+<pre><code class="r">stepsday &lt;- tapply(compdata$steps,compdata$date,sum)
+</code></pre>
+
+<h4>1. Make a histogram of the total number of steps taken each day</h4>
+
+<pre><code class="r">hist(stepsday, breaks=10, main=&quot;The total number of steps per day&quot;, xlab=&quot;Number of Steps&quot;)
+</code></pre>
+
+<p><img src="figure/unnamed-chunk-5-1.png" alt="plot of chunk unnamed-chunk-5"> </p>
+
+<h4>2. Calculate and report the mean and median total number of steps taken per day</h4>
+
+<pre><code class="r">mean(stepsday)
+</code></pre>
+
+<pre><code>## [1] 10766.19
+</code></pre>
+
+<pre><code class="r">median(stepsday)
+</code></pre>
+
+<pre><code>## [1] 10765
+</code></pre>
+
+<h2>What is the average daily activity pattern?</h2>
+
+<p>####1. Make a time series plot</p>
+
+<pre><code class="r">avr &lt;- tapply(compdata$steps, compdata$interval, mean)
+pday&lt;- data.frame(interval=names(avr), mean=avr, stringsAsFactors = FALSE)
+dimnames(pday$mean) &lt;- NULL
+pday$interval &lt;- as.numeric(pday$interval)
+library(ggplot2)
+</code></pre>
+
+<pre><code class="r">g &lt;- ggplot(pday,aes(interval,mean))
+g &lt;- g + geom_line()
+g &lt;- g + ggtitle(&quot;Average Number of Steps during each Time Interval&quot;)
+g &lt;- g + xlab(&quot;5-Minute Time Interval&quot;) + ylab(&quot;Average N° of Steps&quot;)
+g
+</code></pre>
+
+<p><img src="figure/unnamed-chunk-8-1.png" alt="plot of chunk unnamed-chunk-8"> </p>
+
+<h4>2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?</h4>
+
+<pre><code class="r">maxst &lt;- pday$interval[grepl(max(avr), pday$mean)]
+maxst
+</code></pre>
+
+<pre><code>## [1] 835
+</code></pre>
+
+<h2>Imputing missing values</h2>
+
+<h4>1. Calculate and report the total number of missing values in the dataset</h4>
+
+<pre><code class="r">nrow(activdata[!complete.cases(activdata$steps),])
+</code></pre>
+
+<pre><code>## [1] 2304
+</code></pre>
+
+<h4>2. Create a new dataset that is equal to the original dataset but with the missing data filled in</h4>
+
+<pre><code class="r">library(scales)
+library(Hmisc)
+filldata &lt;- activdata
+filldata$steps &lt;- impute(activdata$steps, fun=mean)
+</code></pre>
+
+<h4>3. Make a histogram of the total number of steps taken each day and calculate and report the mean and median total number of steps taken per day</h4>
+
+<pre><code class="r">filldatastep &lt;- tapply(filldata$steps, filldata$date, sum)
+qplot(filldatastep, xlab=&#39;Total steps per day (Imputed)&#39;, ylab=&#39;Frequency using binwith 500&#39;, binwidth=500)
+</code></pre>
+
+<p><img src="figure/unnamed-chunk-12-1.png" alt="plot of chunk unnamed-chunk-12"> </p>
+
+<pre><code class="r">totnumstepMean &lt;- mean(filldatastep)
+totnumstepMedian &lt;- median(filldatastep)
+</code></pre>
+
+<h2>Are there differences in activity patterns between weekdays and weekends?</h2>
+
+<p>####1. Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day</p>
+
+<pre><code class="r">filldata$dateType &lt;-  ifelse(as.POSIXlt(filldata$date)$wday %in% c(0,6), &#39;weekend&#39;, &#39;weekday&#39;)
+</code></pre>
+
+<h4>2. Make a panel plot containing a time series plot</h4>
+
+<pre><code class="r">avrfilldata &lt;- aggregate(steps ~ interval + dateType, data=filldata, mean)
+</code></pre>
+
+<pre><code class="r">ggplot(avrfilldata, aes(interval, steps)) +
+geom_line() + 
+facet_grid(dateType ~ .) +
+xlab(&quot;5-minute interval&quot;) +
+ylab(&quot;avarage number of steps&quot;)
+</code></pre>
+
+<p><img src="figure/unnamed-chunk-15-1.png" alt="plot of chunk unnamed-chunk-15"> </p>
+
+</body>
+
+</html>
