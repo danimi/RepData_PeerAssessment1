@@ -49,7 +49,7 @@ stepsday <- tapply(compdata$steps,compdata$date,sum)
 hist(stepsday, breaks=10, main="The total number of steps per day", xlab="Number of Steps")
 ```
 
-![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
 #### 2. Calculate and report the mean and median total number of steps taken per day
 
 ```r
@@ -88,7 +88,7 @@ g <- g + xlab("5-Minute Time Interval") + ylab("Average N° of Steps")
 g
 ```
 
-![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
 #### 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 ```r
@@ -126,7 +126,7 @@ filldatastep <- tapply(filldata$steps, filldata$date, sum)
 qplot(filldatastep, xlab='Total steps per day (Imputed)', ylab='Frequency using binwith 500', binwidth=500)
 ```
 
-![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12-1.png) 
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12.png) 
 
 ```r
 totnumstepMean <- mean(filldatastep)
@@ -153,5 +153,5 @@ xlab("5-minute interval") +
 ylab("avarage number of steps")
 ```
 
-![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15-1.png) 
+![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15.png) 
 
